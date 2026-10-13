@@ -1,0 +1,448 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Atelier Factures</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: formulaire à gauche, feuille A4 en aperçu direct à droite ; empilés sur mobile */
+:root{
+  --bg:#eef1f0; --panel:#ffffff; --fg:#17201e; --muted:#5d6a67; --line:#d5dcda;
+  --accent:#1d5c55; --accent-fg:#ffffff; --field:#f7f9f8; --danger:#a5332a; --ok:#2f7a4a; --pad:#ffffff;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111716; --panel:#19211f; --fg:#e4ebe9; --muted:#93a29e; --line:#2c3735;
+  --accent:#5fb3a8; --accent-fg:#0d1413; --field:#141b1a; --danger:#e57b70; --ok:#6cc48d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111716; --panel:#19211f; --fg:#e4ebe9; --muted:#93a29e; --line:#2c3735;
+  --accent:#5fb3a8; --accent-fg:#0d1413; --field:#141b1a; --danger:#e57b70; --ok:#6cc48d; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:14px;line-height:1.45}
+.app{padding-inline:16px;padding-block:20px 48px;max-width:1500px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand h1{font-family:var(--display);font-weight:700;font-size:1.6rem;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.brand span{color:var(--muted);font-size:.9rem}
+.seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{border:0;background:transparent;color:var(--fg);font:600 .9rem var(--body);padding:7px 16px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--fg);font:500 .88rem var(--body);padding:8px 14px;border-radius:8px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);font-weight:600}
+.btn.warn{color:var(--danger);border-color:var(--danger)}
+.btn:focus-visible,.seg button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn:disabled{opacity:.55;cursor:progress}
+.layout{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:980px){.layout{grid-template-columns:minmax(0,1fr)}}
+.form{display:flex;flex-direction:column;gap:12px;min-width:0}
+details.sec{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+details.sec>summary{cursor:pointer;list-style:none;padding:12px 14px;font:600 .78rem var(--body);text-transform:uppercase;letter-spacing:.07em;color:var(--muted);display:flex;justify-content:space-between}
+details.sec>summary::after{content:"+";font-family:var(--mono)}
+details.sec[open]>summary::after{content:"–"}
+details.sec>summary::-webkit-details-marker{display:none}
+.sec-body{padding:0 14px 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.full{grid-column:1/-1}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:.78rem;color:var(--muted);min-width:0}
+input,textarea,select{font:inherit;font-size:.9rem;color:var(--fg);background:var(--field);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:58px}
+input[type=color]{padding:2px;height:36px}
+.check{display:flex;gap:8px;align-items:center;font-size:.86rem;color:var(--fg)}
+.check input{width:auto}
+.items{display:flex;flex-direction:column;gap:10px}
+.item{border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;background:var(--field)}
+.item .desc{grid-column:1/-1}
+.item input{background:var(--panel)}
+.item .row-foot{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:.82rem}
+.linkbtn{background:none;border:0;color:var(--danger);cursor:pointer;font:500 .8rem var(--body);padding:2px 0}
+.hint{font-size:.78rem;color:var(--muted);grid-column:1/-1}
+.banner{background:var(--panel);border:1px dashed var(--accent);border-radius:8px;padding:9px 12px;font-size:.84rem;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:.88rem;z-index:20}
+/* Aperçu */
+.stage{position:sticky;top:calc(12px + env(safe-area-inset-top,0px));min-width:0;display:flex;flex-direction:column;gap:8px}
+.stage-head{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.viewport{width:100%;overflow:hidden}
+.scaler{transform-origin:top left;width:794px}
+/* La feuille reste blanche dans les deux thèmes : c'est le document imprimé */
+.paper{--ink:#1b1f1e;--soft:#6b7472;--rule:#e2e6e5;--tint:#f4f6f5;--pa:#1d5c55;
+  width:794px;min-height:1123px;background:#ffffff;color:var(--ink);box-shadow:0 2px 14px rgba(0,0,0,.12);
+  padding:44px 54px 34px;font-family:var(--body);font-size:12.5px;line-height:1.45;display:flex;flex-direction:column;gap:20px}
+.p-head{display:flex;justify-content:space-between;gap:24px;align-items:flex-start}
+.p-logo{max-height:64px;max-width:180px;object-fit:contain;display:block;margin-bottom:10px}
+.p-em-name{font-family:var(--display);font-weight:700;font-size:20px;color:var(--ink)}
+.p-small{color:var(--soft);white-space:pre-line;font-size:11.5px}
+.p-title{text-align:right}
+.p-kind{font-family:var(--display);font-weight:700;font-size:34px;letter-spacing:-.01em;color:var(--pa);line-height:1;text-transform:uppercase}
+.p-num{font-family:var(--mono);font-size:13px;margin-top:6px}
+.p-meta{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.p-box{border-top:2px solid var(--pa);padding-top:10px}
+.p-lab{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--soft);font-weight:600;margin-bottom:4px}
+.p-client{font-weight:600;font-size:14px}
+.p-dates{display:grid;grid-template-columns:auto 1fr;column-gap:14px;row-gap:3px;font-family:var(--mono);font-size:12px}
+.p-dates dt{color:var(--soft);font-family:var(--body)}
+.p-dates dd{margin:0;text-align:right}
+.p-obj{font-size:13px}
+table.p-tab{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.p-tab th{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);font-weight:600;text-align:right;padding:8px 6px;border-bottom:1px solid var(--ink)}
+.p-tab th:first-child,.p-tab td:first-child{text-align:left;padding-left:0}
+.p-tab th:last-child,.p-tab td:last-child{padding-right:0}
+.p-tab td{padding:7px 6px;border-bottom:1px solid var(--rule);text-align:right;font-family:var(--mono);font-size:12px;vertical-align:top}
+.p-tab td:first-child{font-family:var(--body);font-size:12.5px;white-space:pre-line}
+.p-tot-wrap{display:flex;justify-content:space-between;gap:30px;align-items:flex-start}
+.p-vatnote{font-size:11px;color:var(--soft);max-width:300px}
+table.p-tot{min-width:280px;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.p-tot td{padding:5px 0;font-family:var(--mono);font-size:12px}
+.p-tot td:last-child{text-align:right;padding-left:24px}
+.p-tot td:first-child{font-family:var(--body);color:var(--soft)}
+.p-tot tr.grand td{border-top:2px solid var(--pa);padding-top:9px;font-size:16px;font-weight:500;color:var(--ink)}
+.p-tot tr.grand td:first-child{font-weight:600;color:var(--ink)}
+.p-notes{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.p-notes .p-small{color:var(--ink)}
+.p-sign{border:1px solid var(--rule);border-radius:4px;padding:10px 12px;min-height:90px;font-size:11.5px;color:var(--soft)}
+.p-signs{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.p-mysig{min-width:0}
+.p-sigimg{display:block;max-height:62px;max-width:220px;margin:4px 0 2px}
+.p-signame{font-weight:600;font-size:12px}
+.sigpad{display:block;width:100%;height:150px;background:var(--pad);border:1px dashed var(--line);border-radius:6px;touch-action:none;cursor:crosshair}
+.sig-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.p-foot{margin-top:auto;border-top:1px solid var(--rule);padding-top:10px;font-size:10px;color:var(--soft);white-space:pre-line;text-align:center}
+.p-empty{color:var(--soft);font-style:italic}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand"><h1>Atelier Factures</h1><span>factures &amp; devis</span></div>
+    <div class="seg" role="group" aria-label="Type de document">
+      <button id="t-facture" type="button" aria-pressed="true">Facture</button>
+      <button id="t-devis" type="button" aria-pressed="false">Devis</button>
+    </div>
+    <div class="actions">
+      <button class="btn" id="b-convert" type="button" hidden>Transformer en facture</button>
+      <button class="btn" id="b-new" type="button">Nouveau numéro</button>
+      <button class="btn" id="b-reset" type="button">Repartir de l'exemple</button>
+      <button class="btn primary" id="b-pdf" type="button">Télécharger le PDF</button>
+    </div>
+  </header>
+
+  <div class="banner" id="sample-banner" hidden>
+    <span>Les informations affichées sont un <strong>exemple</strong>. Remplacez-les par les vôtres : elles sont gardées dans ce navigateur.</span>
+    <button class="btn" id="b-clear" type="button">Vider le formulaire</button>
+  </div>
+
+  <div class="layout">
+    <form class="form" id="form" autocomplete="off">
+      <details class="sec" open>
+        <summary>Document</summary>
+        <div class="sec-body">
+          <label class="f">Numéro<input id="number"></label>
+          <label class="f">Date d'émission<input id="date" type="date"></label>
+          <label class="f" id="due-wrap">Échéance de paiement<input id="due" type="date"></label>
+          <label class="f" id="valid-wrap" hidden>Valable jusqu'au<input id="valid" type="date"></label>
+          <label class="f">Devise<select id="currency"><option value="EUR">€ Euro</option><option value="CHF">CHF</option><option value="USD">$ Dollar US</option><option value="GBP">£ Livre</option><option value="MAD">MAD Dirham</option><option value="XOF">FCFA</option></select></label>
+          <label class="f full">Objet<input id="subject" placeholder="Ex. Refonte du site vitrine"></label>
+        </div>
+      </details>
+
+      <details class="sec" open>
+        <summary>Votre entreprise</summary>
+        <div class="sec-body">
+          <label class="f full">Nom ou raison sociale<input id="e-name"></label>
+          <label class="f full">Adresse<textarea id="e-address" rows="2"></textarea></label>
+          <label class="f">SIRET<input id="e-siret"></label>
+          <label class="f">N° TVA intracom.<input id="e-vat"></label>
+          <label class="f">E-mail<input id="e-email" type="email"></label>
+          <label class="f">Téléphone<input id="e-phone"></label>
+          <label class="f">IBAN<input id="e-iban"></label>
+          <label class="f">BIC<input id="e-bic"></label>
+          <label class="f">Logo (PNG, JPG, SVG)<input id="e-logo" type="file" accept="image/*"></label>
+          <label class="f">Couleur du document<input id="color" type="color"></label>
+          <div class="hint" id="logo-hint" hidden><button type="button" class="linkbtn" id="b-logo-rm">Retirer le logo</button></div>
+        </div>
+      </details>
+
+      <details class="sec" open>
+        <summary>Client</summary>
+        <div class="sec-body">
+          <label class="f full">Nom ou société<input id="c-name"></label>
+          <label class="f full">Adresse<textarea id="c-address" rows="2"></textarea></label>
+          <label class="f">SIRET / TVA client<input id="c-id"></label>
+          <label class="f">E-mail<input id="c-email" type="email"></label>
+        </div>
+      </details>
+
+      <details class="sec" open>
+        <summary>Prestations</summary>
+        <div class="sec-body">
+          <div class="items full" id="items"></div>
+          <button class="btn full" type="button" id="b-add">+ Ajouter une ligne</button>
+          <label class="f">Remise globale (%)<input id="discount" type="number" min="0" max="100" step="0.5"></label>
+          <label class="f">Acompte déjà versé<input id="deposit" type="number" min="0" step="0.01"></label>
+          <label class="check full"><input id="vat-exempt" type="checkbox"> TVA non applicable (art. 293 B du CGI, micro-entreprise)</label>
+          <label class="f">Nom de la taxe<input id="tax-label" placeholder="TVA"></label>
+          <label class="f">Taux pour toutes les lignes (%)<span style="display:flex;gap:6px"><input id="vat-all" type="number" min="0" step="any" list="vat-rates" placeholder="20"><button class="btn" type="button" id="b-vat-all">Appliquer</button></span></label>
+          <div class="hint">Chaque ligne accepte n'importe quel taux (ex. 8,5 % en outre-mer, 7,7 % en Suisse). Le nom de la taxe remplace « TVA » sur le document.</div>
+          <datalist id="vat-rates"><option value="20"></option><option value="10"></option><option value="5.5"></option><option value="2.1"></option><option value="8.5"></option><option value="0"></option></datalist>
+        </div>
+      </details>
+
+      <details class="sec">
+        <summary>Conditions et mentions</summary>
+        <div class="sec-body">
+          <label class="f full">Conditions de paiement<textarea id="terms" rows="2"></textarea></label>
+          <label class="f full">Notes au client<textarea id="notes" rows="2"></textarea></label>
+          <label class="f full">Pied de page (mentions légales)<textarea id="footer" rows="3"></textarea></label>
+        </div>
+      </details>
+      <details class="sec" open id="sig-sec">
+        <summary>Signature</summary>
+        <div class="sec-body">
+          <div class="full"><canvas class="sigpad" id="sig-pad" aria-label="Zone de signature : dessinez avec la souris ou le doigt"></canvas></div>
+          <div class="sig-tools full">
+            <button class="btn" type="button" id="b-sig-clear">Effacer</button>
+            <label class="btn" for="sig-file" style="cursor:pointer">Importer une image</label>
+            <input id="sig-file" type="file" accept="image/*" hidden>
+            <span class="hint" style="grid-column:auto">Signez dans le cadre avec la souris ou le doigt.</span>
+          </div>
+          <label class="f">Nom du signataire<input id="sig-name" placeholder="Prénom Nom, fonction"></label>
+          <label class="f">Fait à<input id="sig-place" placeholder="Ville"></label>
+          <label class="check full"><input id="sig-show" type="checkbox"> Afficher la signature sur le document</label>
+        </div>
+      </details>
+    </form>
+
+    <section class="stage" aria-label="Aperçu">
+      <div class="stage-head"><span>Aperçu A4</span><span id="stage-total"></span></div>
+      <div class="viewport" id="viewport"><div class="scaler" id="scaler"><div class="paper" id="paper"></div></div></div>
+    </section>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(function(){
+const KEY='atelier-factures-v1';
+const $=id=>document.getElementById(id);
+const today=()=>new Date().toISOString().slice(0,10);
+const addDays=(iso,n)=>{const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
+const year=new Date().getFullYear();
+
+function sample(){const d=today();return{
+  sample:true,type:'facture',number:'F-'+year+'-001',devisNumber:'D-'+year+'-001',date:d,due:addDays(d,30),valid:addDays(d,30),currency:'EUR',
+  subject:'Création d\'un site vitrine',color:'#1d5c55',logo:'',
+  e:{name:'Studio Exemple',address:'12 rue de la Paix\n93200 Saint-Denis',siret:'123 456 789 00012',vat:'FR12 123456789',email:'contact@studio-exemple.fr',phone:'06 12 34 56 78',iban:'FR76 3000 6000 0112 3456 7890 189',bic:'AGRIFRPP'},
+  c:{name:'Boulangerie Martin',address:'4 place du Marché\n75018 Paris',id:'SIRET 987 654 321 00025',email:'compta@boulangerie-martin.fr'},
+  items:[
+    {desc:'Maquettes graphiques (accueil + 4 pages)',qty:1,unit:'forfait',price:850,vat:20},
+    {desc:'Intégration et développement',qty:4,unit:'jour',price:420,vat:20},
+    {desc:'Hébergement et nom de domaine (1 an)',qty:1,unit:'an',price:96,vat:20}],
+  discount:0,deposit:0,vatExempt:false,sig:'',sigName:'Camille Exemple, gérante',sigPlace:'Paris',sigShow:true,
+  terms:'Paiement par virement à 30 jours à réception de facture.',
+  notes:'Merci pour votre confiance.',
+  footer:'En cas de retard de paiement, pénalités au taux de 3 fois le taux d\'intérêt légal, et indemnité forfaitaire de 40 € pour frais de recouvrement (art. L441-10 du Code de commerce). Pas d\'escompte pour paiement anticipé.'
+}}
+function blank(){const s=sample();return Object.assign(s,{sample:false,subject:'',logo:'',
+  e:{name:'',address:'',siret:'',vat:'',email:'',phone:'',iban:'',bic:''},
+  c:{name:'',address:'',id:'',email:''},items:[{desc:'',qty:1,unit:'',price:0,vat:20}],notes:'',sig:'',sigName:'',sigPlace:''})}
+
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
+if(!S||!S.items)S=sample();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=v=>{const n=parseFloat(String(v).replace(',','.'));return isFinite(n)?n:0};
+function money(v){try{return new Intl.NumberFormat('fr-FR',{style:'currency',currency:S.currency}).format(v)}catch(e){return v.toFixed(2)+' '+S.currency}}
+const fmtNum=v=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:3}).format(v);
+const fmtDate=iso=>{if(!iso)return '—';const d=new Date(iso+'T12:00:00');return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'})};
+
+function totals(){
+  const disc=Math.min(100,Math.max(0,num(S.discount)))/100;
+  let ht=0;const byRate={};
+  S.items.forEach(it=>{const l=num(it.qty)*num(it.price);ht+=l;const r=S.vatExempt?0:num(it.vat);byRate[r]=(byRate[r]||0)+l*(1-disc)});
+  const discount=ht*disc,net=ht-discount;let vat=0;const rates=[];
+  Object.keys(byRate).sort((a,b)=>b-a).forEach(r=>{const v=byRate[r]*r/100;if(+r>0){rates.push({r:+r,base:byRate[r],v});vat+=v}});
+  const ttc=net+vat,deposit=num(S.deposit);
+  return{ht,discount,net,rates,vat,ttc,deposit,due:ttc-deposit};
+}
+
+/* ---------- Formulaire ---------- */
+const bind=[['date','date'],['due','due'],['valid','valid'],['currency','currency'],['subject','subject'],['color','color'],
+  ['discount','discount'],['deposit','deposit'],['terms','terms'],['notes','notes'],['footer','footer'],
+  ['e-name','e.name'],['e-address','e.address'],['e-siret','e.siret'],['e-vat','e.vat'],['e-email','e.email'],['e-phone','e.phone'],['e-iban','e.iban'],['e-bic','e.bic'],
+  ['c-name','c.name'],['c-address','c.address'],['c-id','c.id'],['c-email','c.email']];
+const get=p=>p.split('.').reduce((o,k)=>o[k],S);
+const set=(p,v)=>{const ks=p.split('.');const last=ks.pop();ks.reduce((o,k)=>o[k],S)[last]=v};
+
+function fillForm(){
+  bind.forEach(([id,p])=>{$(id).value=get(p)??''});
+  $('vat-exempt').checked=!!S.vatExempt;$('tax-label').value=S.taxLabel||'';if(typeof fillSig==='function')fillSig();
+  renderItems();syncType();
+}
+bind.forEach(([id,p])=>$(id).addEventListener('input',e=>{set(p,e.target.value);touched();}));
+$('vat-exempt').addEventListener('change',e=>{S.vatExempt=e.target.checked;renderItems();touched()});
+const taxName=()=>(S.taxLabel||'').trim()||'TVA';
+$('tax-label').addEventListener('input',e=>{S.taxLabel=e.target.value;renderItems();touched()});
+$('b-vat-all').addEventListener('click',()=>{const v=$('vat-all').value;if(v===''||num(v)<0){toast('Saisissez un taux, par exemple 20');return}
+  S.items.forEach(it=>it.vat=num(v));renderItems();touched();toast('Taux de '+fmtNum(num(v))+' % appliqué à toutes les lignes')});
+
+function renderItems(){
+  const box=$('items');box.innerHTML='';
+  S.items.forEach((it,i)=>{
+    const d=document.createElement('div');d.className='item';
+    d.innerHTML=`<label class="f desc">Désignation<textarea id="it-${i}-desc" rows="1" data-k="desc">${esc(it.desc)}</textarea></label>
+      <label class="f">Qté<input id="it-${i}-qty" type="number" step="any" data-k="qty" value="${esc(it.qty)}"></label>
+      <label class="f">Unité<input id="it-${i}-unit" data-k="unit" value="${esc(it.unit)}" placeholder="h, jour…"></label>
+      <label class="f">Prix unit. HT<input id="it-${i}-price" type="number" step="any" data-k="price" value="${esc(it.price)}"></label>
+      <label class="f">${esc(taxName())} %<input id="it-${i}-vat" type="number" min="0" step="any" list="vat-rates" data-k="vat" value="${esc(it.vat)}" ${S.vatExempt?'disabled':''}></label>
+      <div class="row-foot"><span data-line>${money(num(it.qty)*num(it.price))} HT</span>${S.items.length>1?`<button type="button" class="linkbtn" data-rm>Supprimer</button>`:'<span></span>'}</div>`;
+    d.querySelectorAll('[data-k]').forEach(el=>el.addEventListener('input',()=>{
+      it[el.dataset.k]=el.dataset.k==='desc'||el.dataset.k==='unit'?el.value:el.value;
+      d.querySelector('[data-line]').textContent=money(num(it.qty)*num(it.price))+' HT';touched();}));
+    const rm=d.querySelector('[data-rm]');if(rm)rm.addEventListener('click',()=>{S.items.splice(i,1);renderItems();touched()});
+    box.appendChild(d);
+  });
+}
+$('b-add').addEventListener('click',()=>{S.items.push({desc:'',qty:1,unit:'',price:0,vat:S.items.at(-1)?.vat??20});renderItems();touched();$('it-'+(S.items.length-1)+'-desc').focus()});
+
+$('e-logo').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=()=>{S.logo=r.result;touched();toast('Logo ajouté')};r.readAsDataURL(f)});
+$('b-logo-rm').addEventListener('click',()=>{S.logo='';$('e-logo').value='';touched()});
+
+function syncType(){
+  const isF=S.type==='facture';
+  $('t-facture').setAttribute('aria-pressed',isF);$('t-devis').setAttribute('aria-pressed',!isF);
+  $('due-wrap').hidden=!isF;$('valid-wrap').hidden=isF;$('b-convert').hidden=isF;
+  $('number').value=isF?S.number:S.devisNumber;
+}
+$('number').addEventListener('input',e=>{if(S.type==='devis'){S.devisNumber=e.target.value}else{S.number=e.target.value}touched()});
+function setType(t){S.type=t;syncType();touched()}
+$('t-facture').addEventListener('click',()=>setType('facture'));
+$('t-devis').addEventListener('click',()=>setType('devis'));
+
+function bump(n){const m=String(n).match(/^(.*?)(\d+)(\D*)$/);if(!m)return n+'-2';const v=String(+m[2]+1).padStart(m[2].length,'0');return m[1]+v+m[3]}
+$('b-new').addEventListener('click',()=>{
+  if(S.type==='facture')S.number=bump(S.number);else S.devisNumber=bump(S.devisNumber);
+  S.date=today();S.due=addDays(S.date,30);S.valid=addDays(S.date,30);fillForm();touched();toast('Numéro suivant : '+(S.type==='facture'?S.number:S.devisNumber))});
+$('b-convert').addEventListener('click',()=>{
+  const ref=S.devisNumber;S.type='facture';S.date=today();S.due=addDays(S.date,30);
+  if(!S.notes.includes(ref))S.notes=(S.notes?S.notes+'\n':'')+'Selon devis n° '+ref+'.';
+  fillForm();touched();toast('Devis '+ref+' transformé en facture '+S.number)});
+
+// confirmation intégrée (pas de confirm())
+function twoStep(btn,label,fn){let armed=false,t;btn.addEventListener('click',()=>{
+  if(!armed){armed=true;btn.dataset.l=btn.textContent;btn.textContent=label;btn.classList.add('warn');t=setTimeout(()=>{armed=false;btn.textContent=btn.dataset.l;btn.classList.remove('warn')},3500);return}
+  clearTimeout(t);armed=false;btn.textContent=btn.dataset.l;btn.classList.remove('warn');fn()})}
+twoStep($('b-reset'),'Confirmer : tout remplacer',()=>{S=sample();fillForm();touched(true);toast('Exemple rechargé')});
+twoStep($('b-clear'),'Confirmer : vider',()=>{S=blank();fillForm();touched();toast('Formulaire vidé')});
+
+let tt;function toast(m){const t=$('toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2600)}
+
+/* ---------- Signature ---------- */
+const pad=$('sig-pad'),pctx=pad.getContext('2d');let drawing=false,dirty=false;
+function sizePad(){const r=pad.getBoundingClientRect();if(!r.width)return;const d=window.devicePixelRatio||1;
+  pad.width=Math.round(r.width*d);pad.height=Math.round(r.height*d);pctx.setTransform(d,0,0,d,0,0);drawSig()}
+function penStyle(){pctx.lineWidth=2.4;pctx.lineCap='round';pctx.lineJoin='round';pctx.strokeStyle='#1b2a4a'}
+function drawSig(){const r=pad.getBoundingClientRect();pctx.clearRect(0,0,r.width,r.height);penStyle();if(!S.sig)return;
+  const img=new Image();img.onload=()=>{const s=Math.min(r.width/img.width,r.height/img.height,1/(window.devicePixelRatio||1)*((window.devicePixelRatio||1)));
+    const w=img.width*Math.min(r.width/img.width,r.height/img.height),h=img.height*Math.min(r.width/img.width,r.height/img.height);
+    pctx.drawImage(img,(r.width-w)/2,(r.height-h)/2,w,h);penStyle()};img.src=S.sig}
+new ResizeObserver(sizePad).observe(pad);
+const pt=e=>{const r=pad.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
+pad.addEventListener('pointerdown',e=>{drawing=true;dirty=true;pad.setPointerCapture(e.pointerId);const[x,y]=pt(e);penStyle();pctx.beginPath();pctx.moveTo(x,y);pctx.lineTo(x+.1,y+.1);pctx.stroke();e.preventDefault()});
+pad.addEventListener('pointermove',e=>{if(!drawing)return;const[x,y]=pt(e);pctx.lineTo(x,y);pctx.stroke()});
+function endStroke(){if(!drawing)return;drawing=false;S.sig=pad.toDataURL('image/png');touched()}
+pad.addEventListener('pointerup',endStroke);pad.addEventListener('pointercancel',endStroke);
+$('b-sig-clear').addEventListener('click',()=>{S.sig='';$('sig-file').value='';drawSig();touched();toast('Signature effacée')});
+$('sig-file').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{S.sig=r.result;drawSig();touched();toast('Signature importée')};r.readAsDataURL(f)});
+$('sig-name').addEventListener('input',e=>{S.sigName=e.target.value;touched()});
+$('sig-place').addEventListener('input',e=>{S.sigPlace=e.target.value;touched()});
+$('sig-show').addEventListener('change',e=>{S.sigShow=e.target.checked;touched()});
+function fillSig(){$('sig-name').value=S.sigName||'';$('sig-place').value=S.sigPlace||'';$('sig-show').checked=S.sigShow!==false;drawSig()}
+
+/* ---------- Aperçu ---------- */
+function render(){
+  const T=totals(),isF=S.type==='facture',n=isF?S.number:S.devisNumber;
+  const p=$('paper');p.style.setProperty('--pa',S.color||'#1d5c55');
+  const em=S.e,cl=S.c;
+  const emLines=[em.address,em.siret&&'SIRET '+em.siret,em.vat&&!S.vatExempt&&taxName()+' '+em.vat,em.email,em.phone].filter(Boolean).join('\n');
+  const rows=S.items.map(it=>{const l=num(it.qty)*num(it.price);return`<tr><td>${esc(it.desc)||'<span class="p-empty">Désignation</span>'}</td><td>${fmtNum(num(it.qty))}${it.unit?' '+esc(it.unit):''}</td><td>${money(num(it.price))}</td>${S.vatExempt?'':`<td>${fmtNum(num(it.vat))} %</td>`}<td>${money(l)}</td></tr>`}).join('');
+  let tot=`<tr><td>Total HT</td><td>${money(T.ht)}</td></tr>`;
+  if(T.discount>0)tot+=`<tr><td>Remise ${fmtNum(num(S.discount))} %</td><td>−${money(T.discount)}</td></tr><tr><td>Net HT</td><td>${money(T.net)}</td></tr>`;
+  if(!S.vatExempt)T.rates.forEach(r=>{tot+=`<tr><td>${esc(taxName())} ${fmtNum(r.r)} %</td><td>${money(r.v)}</td></tr>`});
+  tot+=`<tr class="grand"><td>${S.vatExempt?'Total':(taxName()==='TVA'?'Total TTC':'Total '+esc(taxName())+' incl.')}</td><td>${money(T.ttc)}</td></tr>`;
+  if(T.deposit>0)tot+=`<tr><td>Acompte versé</td><td>−${money(T.deposit)}</td></tr><tr class="grand"><td>Reste à payer</td><td>${money(T.due)}</td></tr>`;
+  const showSig=S.sigShow!==false&&(S.sig||S.sigName||S.sigPlace);
+  const sigBlock=showSig?`<div class="p-mysig"><div class="p-lab">${isF?'Signature':'Signature · '+esc(em.name||'entreprise')}</div>${S.sigPlace?`<div class="p-small">Fait à ${esc(S.sigPlace)}, le ${fmtDate(S.date)}</div>`:''}${S.sig?`<img class="p-sigimg" src="${S.sig}" alt="">`:'<div style="height:50px"></div>'}${S.sigName?`<div class="p-signame">${esc(S.sigName)}</div>`:''}</div>`:'';
+  const bank=isF&&(em.iban||em.bic)?`\n\nIBAN ${esc(em.iban)}${em.bic?'\nBIC '+esc(em.bic):''}`:'';
+  p.innerHTML=`
+  <div class="p-head">
+    <div>${S.logo?`<img class="p-logo" src="${S.logo}" alt="">`:''}<div class="p-em-name">${esc(em.name)||'<span class="p-empty">Votre entreprise</span>'}</div><div class="p-small">${esc(emLines)}</div></div>
+    <div class="p-title"><div class="p-kind">${isF?'Facture':'Devis'}</div><div class="p-num">N° ${esc(n)}</div></div>
+  </div>
+  <div class="p-meta">
+    <div class="p-box"><div class="p-lab">${isF?'Facturé à':'Destinataire'}</div><div class="p-client">${esc(cl.name)||'<span class="p-empty">Client</span>'}</div><div class="p-small">${esc([cl.address,cl.id,cl.email].filter(Boolean).join('\n'))}</div></div>
+    <div class="p-box"><div class="p-lab">Informations</div><dl class="p-dates">
+      <dt>Date d'émission</dt><dd>${fmtDate(S.date)}</dd>
+      ${isF?`<dt>Échéance</dt><dd>${fmtDate(S.due)}</dd>`:`<dt>Valable jusqu'au</dt><dd>${fmtDate(S.valid)}</dd>`}
+      <dt>Montant</dt><dd>${money(T.deposit>0?T.due:T.ttc)}</dd></dl></div>
+  </div>
+  ${S.subject?`<div class="p-obj"><span class="p-lab">Objet</span><br>${esc(S.subject)}</div>`:''}
+  <table class="p-tab"><thead><tr><th>Désignation</th><th>Qté</th><th>P.U. HT</th>${S.vatExempt?'':`<th>${esc(taxName())}</th>`}<th>Total HT</th></tr></thead><tbody>${rows}</tbody></table>
+  <div class="p-tot-wrap"><div class="p-vatnote">${S.vatExempt?'TVA non applicable, art. 293 B du CGI.':''}</div><table class="p-tot"><tbody>${tot}</tbody></table></div>
+  <div class="p-notes">
+    <div><div class="p-lab">${isF?'Règlement':'Conditions'}</div><div class="p-small">${esc(S.terms)}${bank}</div>${S.notes?`<div class="p-small" style="margin-top:10px">${esc(S.notes)}</div>`:''}</div>
+    <div></div>
+  </div>
+  ${isF?(sigBlock?`<div class="p-signs"><div></div>${sigBlock}</div>`:''):`<div class="p-signs">${sigBlock||'<div></div>'}<div><div class="p-lab">Bon pour accord · client</div><div class="p-sign">Date, signature et cachet du client, précédés de la mention « Bon pour accord »</div></div></div>`}
+  <div class="p-foot">${esc(S.footer)}${em.name?`\n${esc(em.name)}${em.siret?' · SIRET '+esc(em.siret):''}`:''}</div>`;
+  $('stage-total').textContent=(isF?'Facture ':'Devis ')+money(T.ttc);
+  $('logo-hint').hidden=!S.logo;
+  $('sample-banner').hidden=!S.sample;
+  fit();
+}
+function touched(keepSample){if(!keepSample)S.sample=false;save();render()}
+function fit(){const w=$('viewport').clientWidth,s=Math.min(1,w/794);$('scaler').style.transform=`scale(${s})`;$('viewport').style.height=($('paper').offsetHeight*s)+'px'}
+new ResizeObserver(fit).observe($('viewport'));
+
+/* ---------- PDF ---------- */
+let dl=null;(async()=>{try{dl=window.claude?.use?await window.claude.use('downloads'):null}catch(e){dl=null}})();
+$('b-pdf').addEventListener('click',async()=>{
+  const btn=$('b-pdf');
+  if(!dl){toast('Le téléchargement n\'est pas disponible dans cette vue.');return}
+  btn.disabled=true;btn.textContent='Création du PDF…';
+  const sc=$('scaler'),old=sc.style.transform;sc.style.transform='none';
+  try{
+    await document.fonts.ready;
+    const canvas=await html2canvas($('paper'),{scale:2,backgroundColor:'#ffffff',useCORS:true});
+    const {jsPDF}=window.jspdf;const pdf=new jsPDF({unit:'mm',format:'a4'});
+    const pw=210,ph=297,pxPerPage=Math.floor(canvas.width*ph/pw);
+    if(canvas.height<=pxPerPage*1.4){
+      // tient sur une page : on réduit légèrement au lieu de couper
+      const k=Math.min(1,pxPerPage/canvas.height),w=pw*k,h=canvas.height*pw/canvas.width*k;
+      pdf.addImage(canvas.toDataURL('image/jpeg',0.95),'JPEG',(pw-w)/2,0,w,h);
+    }else for(let y=0,i=0;y<canvas.height;y+=pxPerPage,i++){
+      const h=Math.min(pxPerPage,canvas.height-y);if(i>0&&h<20)break;
+      const c=document.createElement('canvas');c.width=canvas.width;c.height=h;
+      c.getContext('2d').drawImage(canvas,0,y,canvas.width,h,0,0,canvas.width,h);
+      if(i>0)pdf.addPage();pdf.addImage(c.toDataURL('image/jpeg',0.95),'JPEG',0,0,pw,h*pw/canvas.width);
+    }
+    const n=(S.type==='facture'?S.number:S.devisNumber)||S.type;
+    const client=(S.c.name||'').replace(/[^\p{L}\p{N}]+/gu,'-').replace(/^-|-$/g,'');
+    await dl.save({filename:`${S.type==='facture'?'Facture':'Devis'}_${n}${client?'_'+client:''}.pdf`,data:pdf.output('blob')});
+    toast('PDF enregistré');
+  }catch(e){
+    if(e&&e.code==='declined')toast('Téléchargement annulé');
+    else if(e&&e.code==='rate_limited')toast('Une demande est déjà ouverte, réessayez dans un instant.');
+    else toast('Le PDF n\'a pas pu être créé. Réessayez.');
+  }finally{sc.style.transform=old;btn.disabled=false;btn.textContent='Télécharger le PDF';fit()}
+});
+
+fillForm();fillSig();render();
+})();
+</script>
+
+</body></html>
